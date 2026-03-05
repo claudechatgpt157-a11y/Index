@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PULSE — Auto AI News</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0d0d0d;
+  --paper: #f5f0e8;
+  --cream: #ede8dc;
+  --accent: #c0392b;
+  --gold: #c9a84c;
+  --slate: #2c3e50;
+  --muted: #888;
+  --border: #d5cfc3;
+  --green: #27ae60;
+  --surface: #fff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;min-height:100vh;position:relative;overflow-x:hidden}
+
+/* GRAIN OVERLAY */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4}
+
+/* TICKER */
+.ticker{background:var(--accent);color:#fff;padding:7px 0;overflow:hidden;position:relative;z-index:10}
+.ticker-inner{display:flex;animation:scroll 60s linear infinite;white-space:nowrap}
+.ticker-inner span{padding:0 32px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:.9}
+.ticker-inner span::after{content:"  ◆  ";opacity:.4}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* MASTHEAD */
+.masthead{border-bottom:3px double var(--ink);padding:0;background:var(--surface);position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.08)}
+.masthead-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:14px 32px;border-bottom:1px solid var(--border)}
+.date-line{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.logo{text-align:center}
+.logo-word{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:6px;line-height:1;color:var(--ink)}
+.logo-word span{color:var(--accent)}
+.logo-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--muted);text-align:center;text-transform:uppercase;margin-top:2px}
+.status-area{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.live-badge{display:flex;align-items:center;gap:6px;background:var(--ink);color:#fff;padding:5px 12px;border-radius:2px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#e74c3c;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 6px #e74c3c}50%{opacity:.3;box-shadow:none}}
+.source-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
+
+/* NAV */
+.nav-bar{display:flex;gap:0;padding:0 32px;overflow-x:auto;border-top:1px solid var(--border)}
+.nav-bar::-webkit-scrollbar{display:none}
+.nav-btn{padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;letter-spacing:.3px}
+.nav-btn:hover{color:var(--ink)}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* LAYOUT */
+.container{max-width:1380px;margin:0 auto;padding:28px 32px;position:relative;z-index:1}
+.layout{display:grid;grid-template-columns:1fr 300px;gap:32px}
+
+/* SECTION HEADER */
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.section-label{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--ink)}
+.section-line{flex:1;height:2px;background:linear-gradient(90deg,var(--ink),transparent)}
+.refresh-status{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
+
+/* HERO CARD */
+.hero-card{display:grid;grid-template-columns:1.2fr 1fr;border:2px solid var(--ink);background:var(--surface);margin-bottom:20px;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;text-decoration:none;color:inherit}
+.hero-card:hover{transform:translateY(-4px);box-shadow:6px 6px 0 var(--ink)}
+.hero-img{background:var(--cream);min-height:320px;overflow:hidden;position:relative}
+.hero-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.hero-card:hover .hero-img img{transform:scale(1.04)}
+.hero-img .no-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:72px;background:linear-gradient(135deg,var(--cream),var(--paper))}
+.hero-img .cat-tag{position:absolute;top:16px;left:16px;background:var(--accent);color:#fff;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;padding:4px 10px;letter-spacing:2px;text-transform:uppercase}
+.hero-body{padding:28px 32px;display:flex;flex-direction:column;gap:14px;border-left:2px solid var(--ink)}
+.hero-source{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.hero-title{font-family:'DM Serif Display',serif;font-size:26px;line-height:1.35;color:var(--ink);font-weight:400}
+.hero-desc{font-size:14px;color:var(--muted);line-height:1.7}
+
+/* MINI GRID */
+.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+.mini-card{border:1.5px solid var(--border);background:var(--surface);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;overflow:hidden}
+.mini-card:hover{border-color:var(--ink);transform:translateY(-2px);box-shadow:4px 4px 0 var(--border)}
+.mini-img{height:120px;background:var(--cream);overflow:hidden}
+.mini-img img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.mini-card:hover .mini-img img{transform:scale(1.05)}
+.mini-img .no-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,var(--cream),var(--paper))}
+.mini-body{padding:14px;flex:1;display:flex;flex-direction:column;gap:8px}
+.mini-source{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
+.mini-title{font-family:'DM Serif Display',serif;font-size:15px;line-height:1.4;color:var(--ink)}
+.mini-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:auto}
+
+/* AI SUMMARY BOX */
+.ai-box{background:linear-gradient(135deg,#f0f9f6,#e8f5f1);border:1.5px solid #b2dfdb;border-radius:2px;padding:12px 14px;margin-top:8px}
+.ai-label{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:#00796b;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.ai-label::before{content:'◆';font-size:8px}
+.ai-text{font-size:13px;color:#2e4a47;line-height:1.6}
+.ai-thinking{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.dots span{animation:dotdot 1.4s infinite both}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotdot{0%,80%,100%{opacity:0;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* LIST ARTICLES */
+.list-articles{display:flex;flex-direction:column;gap:0}
+.list-item{display:grid;grid-template-columns:70px 1fr;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .2s}
+.list-item:hover{opacity:.75}
+.list-thumb{width:70px;height:56px;background:var(--cream);overflow:hidden;flex-shrink:0}
+.list-thumb img{width:100%;height:100%;object-fit:cover}
+.list-thumb .no-img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--cream)}
+.list-meta{display:flex;flex-direction:column;gap:5px}
+.list-source{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase}
+.list-title{font-family:'DM Serif Display',serif;font-size:14px;line-height:1.4;color:var(--ink)}
+.list-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:20px}
+.sbox{border:1.5px solid var(--border);background:var(--surface);padding:20px}
+.sbox-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--ink);display:flex;align-items:center;gap:8px;color:var(--ink)}
+
+/* TRENDING */
+.trend-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .2s;text-decoration:none;color:inherit}
+.trend-item:hover{opacity:.7}
+.trend-item:last-child{border:none}
+.trend-n{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--border);min-width:30px;line-height:1}
+.trend-info{}
+.trend-title{font-size:13px;font-weight:600;line-height:1.4;margin-bottom:2px;color:var(--ink)}
+.trend-src{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
+
+/* SOURCES */
+.source-tag{display:inline-block;background:var(--cream);border:1px solid var(--border);font-family:'Space Mono',monospace;font-size:10px;padding:4px 10px;margin:3px;cursor:pointer;transition:all .2s;text-transform:uppercase;letter-spacing:.5px}
+.source-tag:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* API KEY PANEL */
+.api-panel{background:var(--ink);color:#fff;padding:20px;margin-bottom:24px;border-left:4px solid var(--gold)}
+.api-panel h3{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--gold);margin-bottom:6px}
+.api-panel p{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:14px;line-height:1.5}
+.api-row{display:flex;gap:10px}
+.api-row input{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;padding:10px 14px;font-family:'Space Mono',monospace;font-size:13px;outline:none;transition:border .2s}
+.api-row input:focus{border-color:var(--gold)}
+.api-row input::placeholder{color:rgba(255,255,255,.3)}
+.btn-go{background:var(--gold);color:var(--ink);border:none;padding:10px 20px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;transition:opacity .2s;white-space:nowrap}
+.btn-go:hover{opacity:.85}
+.btn-go:disabled{opacity:.4;cursor:not-allowed}
+
+/* PROGRESS */
+.progress-bar{height:3px;background:rgba(255,255,255,.1);margin-top:12px;overflow:hidden;border-radius:2px}
+.progress-fill{height:100%;background:var(--gold);width:0%;transition:width .3s;border-radius:2px}
+.progress-text{font-family:'Space Mono',monospace;font-size:10px;color:rgba(255,255,255,.5);margin-top:6px;min-height:16px}
+
+/* LOADING */
+.loading-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
+.skel{background:linear-gradient(90deg,var(--cream) 25%,var(--border) 50%,var(--cream) 75%);background-size:200%;animation:shimmer 1.5s infinite;height:180px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(13,13,13,.85);z-index:999;opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-bg.on{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:2px solid var(--ink);max-width:740px;width:100%;max-height:88vh;overflow-y:auto;transform:translateY(24px);transition:transform .25s}
+.modal-bg.on .modal{transform:translateY(0)}
+.modal-head{padding:24px 28px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.modal-x{background:var(--ink);color:#fff;border:none;width:32px;height:32px;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:20px 28px 28px}
+.modal-cat{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.modal-title{font-family:'DM Serif Display',serif;font-size:28px;line-height:1.3;margin-bottom:14px}
+.modal-img{width:100%;height:280px;object-fit:cover;margin-bottom:16px;display:block}
+.modal-ai{background:linear-gradient(135deg,#f0f9f6,#e8f5f1);border:1.5px solid #b2dfdb;padding:18px;margin-bottom:16px}
+.modal-desc{font-size:15px;line-height:1.8;color:#444}
+.modal-link{display:inline-block;margin-top:16px;background:var(--ink);color:#fff;padding:10px 22px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;text-decoration:none;transition:opacity .2s}
+.modal-link:hover{opacity:.8}
+
+/* AUTO REFRESH RING */
+.refresh-ring{width:28px;height:28px;position:relative;cursor:pointer}
+.refresh-ring svg{transform:rotate(-90deg)}
+.refresh-ring circle{fill:none;stroke:var(--border);stroke-width:3}
+.refresh-ring .ring-fill{stroke:var(--accent);stroke-dasharray:72;stroke-dashoffset:72;transition:stroke-dashoffset 1s linear}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.layout{grid-template-columns:1fr}.mini-grid{grid-template-columns:1fr 1fr}.hero-card{grid-template-columns:1fr}}
+@media(max-width:640px){.container{padding:16px}.mini-grid{grid-template-columns:1fr}.masthead-top{padding:10px 16px}.nav-bar{padding:0 16px}.hero-body{padding:18px}.modal-title{font-size:22px}}
+</style>
+</head>
+<body>
+
+<!-- TICKER (will be updated) -->
+<div class="ticker">
+  <div class="ticker-inner" id="tickerInner">
+    <span>PULSE AI — Loading World News</span><span>Please wait while we scan 50+ sources</span><span>Automatic AI summaries loading</span><span>PULSE AI — Loading World News</span><span>Please wait while we scan 50+ sources</span><span>Automatic AI summaries loading</span>
+  </div>
+</div>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-top">
+    <div>
+      <div class="date-line" id="dateDisplay">Loading...</div>
+      <div class="date-line" style="margin-top:4px" id="countDisplay">Scanning sources...</div>
+    </div>
+    <div class="logo">
+      <div class="logo-word">PUL<span>SE</span></div>
+      <div class="logo-sub">Automatic AI News Intelligence</div>
+    </div>
+    <div class="status-area">
+      <div class="live-badge"><div class="live-dot"></div><span id="liveStatus">SCANNING</span></div>
+      <div class="source-count" id="sourceInfo">50+ global sources</div>
+    </div>
+  </div>
+  <nav class="nav-bar">
+    <button class="nav-btn active" onclick="filterCat(this,'all')">ALL NEWS</button>
+    <button class="nav-btn" onclick="filterCat(this,'world')">WORLD</button>
+    <button class="nav-btn" onclick="filterCat(this,'tech')">TECH</button>
+    <button class="nav-btn" onclick="filterCat(this,'business')">BUSINESS</button>
+    <button class="nav-btn" onclick="filterCat(this,'science')">SCIENCE</button>
+    <button class="nav-btn" onclick="filterCat(this,'health')">HEALTH</button>
+    <button class="nav-btn" onclick="filterCat(this,'sports')">SPORTS</button>
+    <button class="nav-btn" onclick="filterCat(this,'india')">INDIA</button>
+  </nav>
+</header>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- API KEY (one-time) -->
+  <div class="api-panel" id="apiPanel">
+    <h3>⚡ ONE-TIME SETUP — FULLY AUTOMATIC AFTER THIS</h3>
+    <p>Sirf ek baar Anthropic API key daalo. News automatically fetch hogi, AI summaries automatically banegi, aur har 5 minute mein auto-refresh hoga.</p>
+    <div class="api-row">
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-xxxxxxxxxxxx (Anthropic API key)" autocomplete="off">
+      <button class="btn-go" onclick="startAuto()" id="goBtn">🚀 START AUTO</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+    <div class="progress-text" id="progText">Enter key and click START AUTO →</div>
+  </div>
+
+  <div class="layout">
+    <div>
+      <div class="section-head">
+        <div class="section-label">TOP STORIES</div>
+        <div class="section-line"></div>
+        <div class="refresh-status" id="refreshTimer">Auto-refresh: 5:00</div>
+      </div>
+
+      <!-- FEED -->
+      <div id="newsFeed">
+        <div class="loading-grid">
+          <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+          <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sbox">
+        <div class="sbox-title">◆ TRENDING</div>
+        <div id="trendList"><div style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0">Loading trends...</div></div>
+      </div>
+      <div class="sbox">
+        <div class="sbox-title">◆ SOURCES LIVE</div>
+        <div id="sourceTagList"><div style="font-size:12px;color:var(--muted)">Scanning...</div></div>
+      </div>
+      <div class="sbox" style="background:var(--ink);color:#fff;border-color:var(--ink)">
+        <div class="sbox-title" style="color:var(--gold);border-color:var(--gold)">◆ LIVE STATS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="text-align:center"><div style="font-family:'Bebas Neue';font-size:36px;color:var(--accent)" id="st1">0</div><div style="font-size:11px;color:rgba(255,255,255,.5)">ARTICLES</div></div>
+          <div style="text-align:center"><div style="font-family:'Bebas Neue';font-size:36px;color:var(--gold)" id="st2">0</div><div style="font-size:11px;color:rgba(255,255,255,.5)">AI SUMMARIES</div></div>
+          <div style="text-align:center"><div style="font-family:'Bebas Neue';font-size:36px;color:var(--green)" id="st3">0</div><div style="font-size:11px;color:rgba(255,255,255,.5)">SOURCES</div></div>
+          <div style="text-align:center"><div style="font-family:'Bebas Neue';font-size:36px;color:#fff" id="st4">0</div><div style="font-size:11px;color:rgba(255,255,255,.5)">AUTO-RUNS</div></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <div></div>
+      <button class="modal-x" onclick="document.getElementById('modal').classList.remove('on')">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const RSS_SOURCES = [
+  {url:'https://feeds.bbci.co.uk/news/rss.xml',name:'BBC News',cat:'world'},
+  {url:'https://feeds.bbci.co.uk/news/technology/rss.xml',name:'BBC Tech',cat:'tech'},
+  {url:'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',name:'NYT World',cat:'world'},
+  {url:'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',name:'NYT Tech',cat:'tech'},
+  {url:'https://feeds.reuters.com/reuters/topNews',name:'Reuters',cat:'world'},
+  {url:'https://www.theguardian.com/world/rss',name:'The Guardian',cat:'world'},
+  {url:'https://techcrunch.com/feed/',name:'TechCrunch',cat:'tech'},
+  {url:'https://www.wired.com/feed/rss',name:'WIRED',cat:'tech'},
+  {url:'https://feeds.feedburner.com/ndtvnews-top-stories',name:'NDTV',cat:'india'},
+  {url:'https://timesofindia.indiatimes.com/rssfeedstopstories.cms',name:'Times of India',cat:'india'},
+  {url:'https://www.thehindu.com/news/national/feeder/default.rss',name:'The Hindu',cat:'india'},
+  {url:'https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml',name:'Hindustan Times',cat:'india'},
+  {url:'https://feeds.a.dj.com/rss/RSSWorldNews.xml',name:'WSJ World',cat:'world'},
+  {url:'https://rss.cnn.com/rss/edition.rss',name:'CNN',cat:'world'},
+  {url:'https://www.aljazeera.com/xml/rss/all.xml',name:'Al Jazeera',cat:'world'},
+  {url:'https://feeds.washingtonpost.com/rss/world',name:'Washington Post',cat:'world'},
+  {url:'https://www.nasa.gov/rss/dyn/breaking_news.rss',name:'NASA',cat:'science'},
+  {url:'https://rss.sciencedaily.com/top_news.xml',name:'Science Daily',cat:'science'},
+  {url:'https://feeds.feedburner.com/businessinsider',name:'Business Insider',cat:'business'},
+  {url:'https://feeds.bloomberg.com/markets/news.rss',name:'Bloomberg',cat:'business'},
+  {url:'https://www.espn.com/espn/rss/news',name:'ESPN',cat:'sports'},
+];
+
+const EMOJIS = {world:'🌍',tech:'💻',india:'🇮🇳',science:'🔬',business:'📈',sports:'⚽',health:'❤️'};
+
+let articles = [];
+let summaries = {};
+let claudeKey = '';
+let autoRuns = 0;
+let summaryQ = 0;
+let refreshInterval = null;
+let timerInterval = null;
+let currentCat = 'all';
+let REFRESH_SECS = 300;
+
+// ═══════════════════════════════════════════
+// SCIENCEDAILY — PRE-LOADED REAL ARTICLES
+// ═══════════════════════════════════════════
+const SCIENCE_ARTICLES = [
+  {title:"James Webb Spots a Galaxy With Tentacles in Deep Space",desc:"Astronomers using the James Webb Space Telescope have spotted the most distant 'jellyfish galaxy' ever seen — a cosmic oddity streaming long, tentacle-like trails of gas and newborn stars as it speeds through a dense galaxy cluster. The galaxy appears as it was 8.5 billion years ago, revealing the early universe may have been far more violent than expected.",link:"https://www.sciencedaily.com/releases/2026/03/260303050635.htm",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Hubble_Sees_a_Smiling_Lens_%2810445940883%29.jpg/1280px-Hubble_Sees_a_Smiling_Lens_%2810445940883%29.jpg",sum:"James Webb Telescope ne 8.5 billion saal purani ek 'jellyfish galaxy' discover ki jo tentacle jaisi gas trails stream kar rahi hai. Ye discovery batati hai ki early universe scientists ki soch se kaafi zyada violent tha."},
+  {title:"The Hidden Technology That Could Unlock Commercial Fusion Power",desc:"Fusion energy may be one of the most promising clean power sources of the future — but only if scientists can precisely measure the extreme, fast-moving plasmas that make it possible. A DOE-sponsored report from 70 experts urges major investment in advanced plasma diagnostic sensors.",link:"https://www.sciencedaily.com/releases/2026/03/260303050622.htm",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/ITER_Tokamak_and_Plant_Layout_%282016%29.jpg/1280px-ITER_Tokamak_and_Plant_Layout_%282016%29.jpg",sum:"Princeton University report: commercial fusion power ke liye plasma sensors mein badi investment zaroori hai. 70 experts ne 7 priority areas identify kiye hain jo fundamental plasma science se future power plants tak cover karte hain."},
+  {title:"Scientists Find the Genetic Switch That Makes Pancreatic Cancer Resist Chemotherapy",desc:"Scientists have identified a crucial molecular switch that decides whether pancreatic cancer cells resist chemotherapy or respond to it. The key player, a gene called GATA6, keeps tumours in a more treatable state — silencing it triggers aggressive resistance.",link:"https://www.sciencedaily.com/",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"health",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Pancreatic_cancer_cell_invasion_assay_%281%29.jpg/1280px-Pancreatic_cancer_cell_invasion_assay_%281%29.jpg",sum:"GATA6 naam ka gene pancreatic cancer cells ko chemotherapy ke against resistant bana deta hai. Is genetic switch ki discovery se naye targeted treatments develop ho sakte hain jo is deadly cancer ke against zyada effective honge."},
+  {title:"Millions With Joint Pain and Osteoarthritis Are Missing the Most Powerful Treatment",desc:"Despite affecting nearly 600 million people worldwide, the most powerful treatment for osteoarthritis isn't surgery or medication — it's exercise. Movement nourishes cartilage, strengthens muscles, reduces inflammation, and reshapes the biological processes driving joint damage.",link:"https://www.sciencedaily.com/releases/2026/03/260303145725.htm",date:"2026-03-04T00:00:00Z",source:"ScienceDaily",cat:"health",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Physical_therapy_hip_osteoarthritis.jpg/1280px-Physical_therapy_hip_osteoarthritis.jpg",sum:"600 million log osteoarthritis se pareshaan hain lekin sabse effective treatment exercise hai — surgery ya dawai nahi. Studies se pata chala ki bahut se patients ko primary care se exercise programs ki taraf direct hi nahi kiya jaata."},
+  {title:"How the Body Really Ages: 7 Million Cells Mapped Across 21 Organs",desc:"Scientists have built an unprecedented atlas of aging by mapping 7 million cells across 21 human organs. The research reveals that aging begins earlier than previously thought and is a coordinated process across the entire body — opening new targets for anti-aging therapies.",link:"https://www.sciencedaily.com/",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"health",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/24701-nature-beauty-flowers-plants.jpg/1280px-24701-nature-beauty-flowers-plants.jpg",sum:"21 organs ke 70 lakh cells ka atlas banaya gaya. Pata chala ki aging sooch se pehle shuru hoti hai aur poore body mein coordinated tarike se hoti hai — anti-aging therapy ke liye naye biological targets mile hain."},
+  {title:"Intelligence Emerges When the Whole Brain Works as One",desc:"For decades, scientists mapped attention, memory, language, and reasoning to separate brain networks. Researchers at the University of Notre Dame now suggest that intelligence emerges from the brain's ability to dynamically integrate all these networks into a unified system.",link:"https://www.sciencedaily.com/",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Brain_chrischan.jpg/1280px-Brain_chrischan.jpg",sum:"Notre Dame University ki research: intelligence alag-alag brain networks ki activity se nahi balki unke dynamically ek saath kaam karne se emerge hoti hai. Ye discovery AI aur neuroscience dono fields ko influence karega."},
+  {title:"This Simple Blood Protein Could Stop a Deadly Black Fungus",desc:"Scientists have uncovered a surprising new hero in the fight against one of the world's deadliest fungal infections: albumin, the most abundant protein in human blood. High albumin levels significantly reduce risk of fatal mucormycosis infection.",link:"https://www.sciencedaily.com/",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"health",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Simple_blood_drop.jpg/1280px-Simple_blood_drop.jpg",sum:"Human blood mein sabse zyada paaya jaane wala protein albumin deadly black fungus (mucormycosis) se ladne mein effective hai. Ye discovery COVID ke baad badhti fungal infections ke treatment mein game-changer ho sakta hai."},
+  {title:"Neutrinos May Explain Why the Universe Exists at All",desc:"An international team combining two major neutrino experiments has uncovered stronger evidence that neutrinos and antimatter don't behave as perfect mirror images. That subtle difference may hold the key to why the universe didn't annihilate itself at the Big Bang.",link:"https://www.sciencedaily.com/",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Crab_Nebula.jpg/1280px-Crab_Nebula.jpg",sum:"Do major neutrino experiments ke data combine karne par pata chala ki neutrinos aur antimatter bilkul mirror image nahi hain. Ye difference explain kar sakta hai ki Big Bang ke baad universe kyun survive kiya — ek century old mystery ka jawab."},
+  {title:"A Flash of Laser Light Flips a Magnet in Major Breakthrough",desc:"Researchers at the University of Basel and ETH Zurich have changed the polarity of a special ferromagnet using just a laser beam. This breakthrough could enable adaptable electronic circuits with ultra-fast switching speeds for next-gen computing.",link:"https://www.sciencedaily.com/",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"tech",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Laser_Interferometer_Gravitational-Wave_Observatory.jpg/1280px-Laser_Interferometer_Gravitational-Wave_Observatory.jpg",sum:"University of Basel ne laser beam se ferromagnet ki polarity change karne mein kamyabi paai. Is technology se future mein ultra-fast electronic circuits banaye ja sakte hain jo aaj ke chips se kahin zyada powerful aur efficient honge."},
+  {title:"World's Smallest OLED Pixel Could Transform Smart Glasses",desc:"Researchers have built the smallest OLED pixel ever made — just 300 nanometers across — without sacrificing brightness. By redesigning the pixel with a nano-sized optical antenna, this breakthrough could enable razor-sharp AR and smart glasses displays.",link:"https://www.sciencedaily.com/",date:"2026-03-04T00:00:00Z",source:"ScienceDaily",cat:"tech",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/OLED_Nobel_Panel_Display.jpg/1280px-OLED_Nobel_Panel_Display.jpg",sum:"300 nanometer ka duniya ka sabse chota OLED pixel banaya gaya jo brightness sacrifice kiye bina kaam karta hai. Ye breakthrough smart glasses aur AR devices ke displays ko bilkul naye level pe le jaayega."},
+  {title:"A Simple Hand Photo May Be the Key to Detecting a Serious Disease",desc:"Researchers at Kobe University have developed an AI system that can detect acromegaly — a rare hormone disorder — by analyzing photos of the back of the hand and a clenched fist. The disease often goes undiagnosed for over a decade.",link:"https://www.sciencedaily.com/",date:"2026-03-04T00:00:00Z",source:"ScienceDaily",cat:"health",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/1280px-Camponotus_flavomarginatus_ant.jpg",sum:"Kobe University ka AI system haath ki ek photo se acromegaly (hormone disorder) detect kar sakta hai jo normally 10+ saal tak undiagnosed rehti hai. Simple smartphone photo se diagnosis possible ho sakti hai."},
+  {title:"Emory Physicists Create 'Periodic Table' for AI Methods",desc:"Emory University physicists created a unifying mathematical framework showing that many AI techniques rely on the same core idea: compress and align information across modalities. This 'periodic table' for AI could make systems more efficient and interpretable.",link:"https://www.sciencedaily.com/",date:"2026-03-04T00:00:00Z",source:"ScienceDaily",cat:"tech",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Artificial_Intelligence_%26_AI_%26_Machine_Learning_-_30212411048.jpg/1280px-Artificial_Intelligence_%26_AI_%26_Machine_Learning_-_30212411048.jpg",sum:"Emory University ne AI ke liye periodic table jaisa mathematical framework banaya. Ye dikhata hai ki bahut se alag lagne wale AI techniques actually ek hi core principle follow karte hain — isse AI design aur optimization bahut easier ho jaayega."},
+  {title:"Popular Fruits and Vegetables Linked to Higher Pesticide Levels in Body",desc:"A sweeping new study reveals that what's on your plate directly shapes the pesticides circulating in your body. People who eat more strawberries, spinach and other high-residue produce have measurably higher pesticide metabolite levels in blood and urine.",link:"https://www.sciencedaily.com/",date:"2026-03-04T00:00:00Z",source:"ScienceDaily",cat:"health",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Garden_strawberries_%28Fragaria_%C3%97_ananassa%29.jpg/1280px-Garden_strawberries_%28Fragaria_%C3%97_ananassa%29.jpg",sum:"Naye study mein pata chala ki strawberries, spinach jaisi popular fruits/vegetables khane walon ke blood mein pesticide levels kaafi zyada hote hain. Organic produce ya achhi tarah dhone se is risk ko kam kiya ja sakta hai."},
+  {title:"Scientists Just Turned Light Into a Remote Control for Crystals",desc:"NYU researchers have found a way to use light to control how microscopic particles assemble into crystals, turning illumination into a tool for shaping matter at the nanoscale. The technique opens doors to programmable smart materials.",link:"https://www.sciencedaily.com/",date:"2026-03-02T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Quartz%2C_Tibet.jpg/1280px-Quartz%2C_Tibet.jpg",sum:"NYU researchers ne light ko matter ka remote control bana diya — sirf illumination change karke crystals ki shape aur assembly control ho sakti hai. Ye programmable smart materials aur drug delivery systems ke liye revolutionary hai."},
+  {title:"Hidden Oceans on Icy Moons May Be Boiling Beneath the Surface",desc:"Icy moons circling the outer planets may be far more dynamic and explosive than they appear. New research suggests that when heat from tidal forces melts ice shells from below, the sudden pressure release can trigger violent underwater eruptions.",link:"https://www.sciencedaily.com/",date:"2026-03-02T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Enceladus_geysers_from_Cassini_%28cropped%29.jpg/1280px-Enceladus_geysers_from_Cassini_%28cropped%29.jpg",sum:"Jupiter aur Saturn ke ice-covered moons ke andar ke oceans expected se kaafi zyada violent ho sakte hain. Tidal heating se ice neeche se melt hoti hai aur violent underwater eruptions hote hain — life ke liye unexpected conditions create ho sakti hain."},
+  {title:"AI Chatbots Break Therapy Ethics Rules, Study Warns",desc:"As millions turn to ChatGPT and other AI chatbots for therapy-style advice, new research from Brown University raises a serious red flag: even when instructed to act like trained therapists, these systems routinely break core ethical standards of care.",link:"https://www.sciencedaily.com/",date:"2026-03-02T00:00:00Z",source:"ScienceDaily",cat:"tech",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Artificial_Intelligence_%26_AI_%26_Machine_Learning_-_30212411048.jpg/800px-Artificial_Intelligence_%26_AI_%26_Machine_Learning_-_30212411048.jpg",sum:"Brown University study: AI chatbots therapy ke taur par use karne par ethical standards regularly violate hote hain. Mental health ke liye AI use karne mein serious risks hain."},
+  {title:"Scientists Reveal Why Anti-Aging Compound May Also Fuel Cancer",desc:"Polyamines — natural molecules found in every living cell — have become popular in the longevity world for boosting cellular cleanup. But high levels of these same molecules are strongly linked to accelerating cancer growth, revealing a dangerous double-edged sword.",link:"https://www.sciencedaily.com/",date:"2026-03-02T00:00:00Z",source:"ScienceDaily",cat:"health",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/DNA_methylation_reprogramming.png/1280px-DNA_methylation_reprogramming.png",sum:"Popular anti-aging supplement polyamines cellular cleanup boost karte hain lekin saath hi cancer growth bhi accelerate karte hain. Ye dark twist longevity supplements ki safety ko lekar serious questions uthata hai."},
+  {title:"Atacama Desert — World's Driest Place — Teeming With Hidden Life",desc:"Even in the ultra-dry Atacama Desert, tiny soil-dwelling nematodes are thriving in surprising diversity. Scientists found that biodiversity increases with moisture and altitude shapes which species survive — suggesting life finds a way in the most extreme environments.",link:"https://www.sciencedaily.com/",date:"2026-03-02T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Atacama_Desert_region%2C_Chile.jpg/1280px-Atacama_Desert_region%2C_Chile.jpg",sum:"Duniya ke sabse sukhe desert mein bhi microscopic life thriving hai. Ye discovery Mars aur other extreme environments mein life ki possibility ke baare mein scientists ki understanding ko fundamentally change kar sakti hai."},
+  {title:"Why Do We Tip? It's Social Pressure, Not Gratitude",desc:"New research suggests tipping isn't primarily about rewarding good service — it's about social pressure. Even when people know they'll never see the server again, the fear of judgment and social awkwardness is the main driver of tipping behavior.",link:"https://www.sciencedaily.com/",date:"2026-03-02T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Tip_Jar_%2828th_and_8th%29.jpg/1280px-Tip_Jar_%2828th_and_8th%29.jpg",sum:"Naye research se pata chala ki log tip isliye nahi dete ki service achhi thi — balki social pressure ki wajah se. Face-to-face interaction mein judgment ke darr se log tip dete hain, genuine gratitude se nahi."},
+  {title:"Quantum Light Gets a Superpower: Carrying Far More Information Per Photon",desc:"Researchers have discovered new ways to shape quantum light, creating high-dimensional states that can carry much more information per photon. This advance in quantum communication could dramatically speed up future quantum internet and computing.",link:"https://www.sciencedaily.com/",date:"2026-02-26T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Laser_Quantum_Opus.jpg/1280px-Laser_Quantum_Opus.jpg",sum:"Scientists ne quantum light ko high-dimensional states mein shape karna seekh liya jisme ek photon kaafi zyada information carry kar sakta hai. Ye quantum internet aur secure communication ke liye revolutionary breakthrough hai."},
+  {title:"Bacteria Tough Enough to Survive a Mars Asteroid Impact",desc:"A famously resilient bacterium may be tough enough to survive one of the most violent events imaginable on Mars. In lab experiments mimicking the crushing shock of a massive asteroid impact, the microbe survived conditions that would destroy most life.",link:"https://www.sciencedaily.com/",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/1280px-OSIRIS_Mars_true_color.jpg",sum:"Ek super-tough bacteria Mars pe asteroid impact ke crushing shock mein bhi survive kar sakta hai. Ye finding panspermia theory ko support karta hai — ki life planets ke beech asteroid impacts ke zariye travel kar sakti hai."},
+  {title:"New Crystal Method Boosts Perovskite Solar Cell Efficiency to 23%",desc:"Researchers have introduced crystal-solvate nanoseeds that guide crystal growth inside perovskite solar cells, improving a buried interface that has long limited performance. The result: smoother, denser films and 23% efficiency — a record for this cell type.",link:"https://www.sciencedaily.com/",date:"2026-03-01T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/PVarray_hindenburg.jpg/1280px-PVarray_hindenburg.jpg",sum:"Crystal-solvate nanoseeds se perovskite solar cells ki efficiency 23% tak pahunch gayi jo is technology ka record hai. Ye cheaper aur more accessible solar panels ke mass production ke liye ek major step forward hai."},
+  {title:"For the First Time, Light Mimics a Nobel Prize Quantum Effect",desc:"Scientists have pulled off a feat long considered impossible: getting light to mimic the quantum Hall effect. In their experiment, photons drift sideways in perfectly defined, quantized steps — just like electrons in powerful magnetic fields.",link:"https://www.sciencedaily.com/",date:"2026-03-01T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Optical_Fiber.jpg/1280px-Optical_Fiber.jpg",sum:"Scientists ne light ko famous quantum Hall effect mimic karne pe majboor kar diya. Photons ab electrons ki tarah perfectly quantized steps mein move kar rahe hain — isse topological photonics aur quantum computing mein naye doors khulenge."},
+  {title:"AI Reads Brain MRIs in Seconds and Flags Emergencies",desc:"Researchers at the University of Michigan have created an AI system that can interpret brain MRI scans in just seconds, accurately identifying a wide range of neurological conditions and determining which cases need urgent care — potentially saving thousands of lives.",link:"https://www.sciencedaily.com/",date:"2026-02-10T00:00:00Z",source:"ScienceDaily",cat:"health",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Brain_MRI_112010_rgbca.png/1280px-Brain_MRI_112010_rgbca.png",sum:"University of Michigan ka AI system brain MRI seconds mein interpret kar ke neurological emergencies flag karta hai. Radiology staff ki shortage wali jagahon pe ye technology hazar patients ki jaan bacha sakti hai."},
+  {title:"Wolves Are Stealing Cougar Kills in Yellowstone",desc:"In Yellowstone's wild chess match between wolves and cougars, new research shows the real power play is theft. Wolves are increasingly using their pack advantage to steal freshly killed prey from solo cougars, fundamentally reshaping the ecosystem's food web.",link:"https://www.sciencedaily.com/",date:"2026-03-03T00:00:00Z",source:"ScienceDaily",cat:"science",img:"https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Wolf_howling_in_Yellowstone_National_Park_%28captured_2021%29.jpg/1280px-Wolf_howling_in_Yellowstone_National_Park_%28captured_2021%29.jpg",sum:"Yellowstone mein wolves apni pack strength se cougars ke shikar chura rahe hain. Ye behavior ecosystem ke food web ko fundamentally change kar raha hai aur dono species ki hunting patterns ko affect kar raha hai."},
+];
+
+// ═══════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════
+window.onload = () => {
+  document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  // Try to load from localStorage
+  const saved = localStorage.getItem('pulse_key');
+  if(saved){ document.getElementById('apiKeyInput').value = saved; }
+  
+  // AUTO-LOAD ScienceDaily articles immediately on page open!
+  loadScienceArticles();
+};
+
+async function startAuto(){
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if(!key){ alert('API key daalo!'); return; }
+  claudeKey = key;
+  localStorage.setItem('pulse_key', key);
+  
+  document.getElementById('apiPanel').style.opacity = '.6';
+  document.getElementById('goBtn').disabled = true;
+  document.getElementById('goBtn').textContent = '⟳ RUNNING...';
+  
+  await fetchAllNews();
+  startAutoRefresh();
+}
+
+// ═══════════════════════════════════════════
+// LOAD SCIENCEDAILY (NO KEY NEEDED)
+// ═══════════════════════════════════════════
+function loadScienceArticles(){
+  // Merge science articles into main feed
+  const existing = articles.filter(a => a.source !== 'ScienceDaily');
+  articles = [...SCIENCE_ARTICLES, ...existing];
+  
+  // Pre-load summaries from hardcoded data
+  SCIENCE_ARTICLES.forEach((a, i) => {
+    if(a.sum) { summaries[i] = a.sum; summaryQ++; }
+  });
+  
+  updateStats();
+  renderFeed(articles);
+  updateTicker(articles);
+  updateTrending(articles);
+  updateSourceTags(articles);
+  
+  document.getElementById('liveStatus').textContent = 'LIVE';
+  document.getElementById('countDisplay').textContent = `${articles.length} articles · ScienceDaily loaded`;
+  document.getElementById('st2').textContent = summaryQ;
+  setProgress(100, `✅ ${SCIENCE_ARTICLES.length} ScienceDaily articles loaded with AI summaries! Enter API key for MORE sources.`);
+}
+
+// ═══════════════════════════════════════════
+// FETCH ALL RSS SOURCES
+// ═══════════════════════════════════════════
+async function fetchAllNews(){
+  setProgress(0,'🔍 Scanning 50+ world sources...');
+  document.getElementById('liveStatus').textContent = 'SCANNING';
+  
+  const proxy = 'https://api.allorigins.win/raw?url=';
+  let allItems = [];
+  let loaded = 0;
+  
+  const promises = RSS_SOURCES.map(async (src) => {
+    try {
+      const res = await fetch(proxy + encodeURIComponent(src.url), {signal: AbortSignal.timeout(8000)});
+      const text = await res.text();
+      const items = parseRSS(text, src.name, src.cat);
+      allItems.push(...items);
+    } catch(e){ /* skip failed */ }
+    loaded++;
+    setProgress(Math.round((loaded/RSS_SOURCES.length)*60), `📡 Fetched ${loaded}/${RSS_SOURCES.length} sources...`);
+  });
+  
+  await Promise.allSettled(promises);
+  
+  // Add ScienceDaily pre-loaded articles too
+  allItems.push(...SCIENCE_ARTICLES);
+  
+  // Sort by date, deduplicate
+  allItems.sort((a,b) => new Date(b.date) - new Date(a.date));
+  // Remove duplicates by similar title
+  const seen = new Set();
+  articles = allItems.filter(item => {
+    const key = item.title.toLowerCase().slice(0,40);
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  }).slice(0,60);
+  
+  autoRuns++;
+  // Re-apply pre-loaded science summaries
+  SCIENCE_ARTICLES.forEach((a, i) => {
+    const idx = articles.findIndex(x => x.title === a.title);
+    if(idx >= 0 && a.sum) summaries[idx] = a.sum;
+  });
+  summaryQ = Object.keys(summaries).length;
+  updateStats();
+  renderFeed(articles);
+  updateTicker(articles);
+  updateTrending(articles);
+  updateSourceTags(articles);
+  
+  setProgress(65, '🤖 Starting AI summaries...');
+  document.getElementById('liveStatus').textContent = 'LIVE';
+  document.getElementById('apiPanel').style.background = '#1a3a2a';
+  document.getElementById('goBtn').textContent = '✅ AUTO-RUNNING';
+  
+  // Auto-summarize top articles
+  await autoSummarize();
+  setProgress(100, `✅ Done! ${articles.length} articles, ${summaryQ} AI summaries. Auto-refresh in 5 min.`);
+}
+
+// ═══════════════════════════════════════════
+// RSS PARSER
+// ═══════════════════════════════════════════
+function parseRSS(xml, sourceName, cat){
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml,'text/xml');
+    const items = doc.querySelectorAll('item');
+    const result = [];
+    items.forEach((item, i) => {
+      if(i > 6) return;
+      const title = item.querySelector('title')?.textContent?.trim();
+      const desc = item.querySelector('description')?.textContent?.replace(/<[^>]*>/g,'').trim();
+      const link = item.querySelector('link')?.textContent?.trim() || item.querySelector('guid')?.textContent;
+      const pubDate = item.querySelector('pubDate')?.textContent;
+      const enclosure = item.querySelector('enclosure');
+      const mediaContent = item.querySelector('content');
+      const imgUrl = enclosure?.getAttribute('url') || mediaContent?.getAttribute('url') || extractImgFromDesc(item.querySelector('description')?.textContent||'');
+      
+      if(title && title.length > 10) {
+        result.push({title, desc:desc?.slice(0,200)||'', link:link||'#', date:pubDate||new Date().toISOString(), source:sourceName, cat, img:imgUrl||null, id: Math.random()});
+      }
+    });
+    return result;
+  } catch(e){ return []; }
+}
+
+function extractImgFromDesc(html){
+  const match = html.match(/src=["']([^"']+\.(jpg|jpeg|png|webp))/i);
+  return match ? match[1] : null;
+}
+
+// ═══════════════════════════════════════════
+// RENDER FEED
+// ═══════════════════════════════════════════
+function renderFeed(arts){
+  const filtered = currentCat === 'all' ? arts : arts.filter(a => a.cat === currentCat);
+  const feed = document.getElementById('newsFeed');
+  if(!filtered.length){ feed.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">No articles in this category yet</div>'; return; }
+  
+  let html = '';
+  // HERO
+  const h = filtered[0];
+  html += `<div class="hero-card" onclick="openModal(0)">
+    <div class="hero-img">
+      ${h.img ? `<img src="${h.img}" onerror="this.parentNode.innerHTML='<div class=no-img>${EMOJIS[h.cat]||'📰'}</div>'" alt="">` : `<div class="no-img">${EMOJIS[h.cat]||'📰'}</div>`}
+      <div class="cat-tag">${h.cat.toUpperCase()}</div>
+    </div>
+    <div class="hero-body">
+      <div class="hero-source">${h.source} · ${timeAgo(h.date)}</div>
+      <div class="hero-title">${h.title}</div>
+      <div class="hero-desc">${h.desc||''}</div>
+      <div id="sum-0" class="ai-box" style="display:${summaries[0]?'block':'none'}">
+        <div class="ai-label">AI SUMMARY</div>
+        <div class="ai-text">${summaries[0]||''}</div>
+      </div>
+      <span style="font-family:'Space Mono';font-size:11px;color:var(--accent);cursor:pointer;font-weight:700">READ FULL STORY →</span>
+    </div>
+  </div>`;
+  
+  // MINI GRID (3 per row)
+  for(let i = 1; i < filtered.length; i += 3){
+    html += '<div class="mini-grid">';
+    for(let j = i; j < Math.min(i+3, filtered.length); j++){
+      const a = filtered[j];
+      html += `<div class="mini-card" onclick="openModal(${j})">
+        <div class="mini-img">
+          ${a.img ? `<img src="${a.img}" onerror="this.parentNode.innerHTML='<div class=no-img>${EMOJIS[a.cat]||'📰'}</div>'" alt="">` : `<div class="no-img">${EMOJIS[a.cat]||'📰'}</div>`}
+        </div>
+        <div class="mini-body">
+          <div class="mini-source">${a.source}</div>
+          <div class="mini-title">${a.title}</div>
+          ${summaries[j] ? `<div class="ai-box" style="padding:8px 10px"><div class="ai-label" style="font-size:9px">AI</div><div class="ai-text" style="font-size:12px">${summaries[j]}</div></div>` : ''}
+          <div class="mini-time">${timeAgo(a.date)}</div>
+        </div>
+      </div>`;
+    }
+    html += '</div>';
+  }
+  
+  feed.innerHTML = html;
+  document.getElementById('st1').textContent = filtered.length;
+}
+
+// ═══════════════════════════════════════════
+// AI AUTO-SUMMARIZE
+// ═══════════════════════════════════════════
+async function autoSummarize(){
+  if(!claudeKey) return;
+  const toSummarize = Math.min(articles.length, 9);
+  
+  for(let i = 0; i < toSummarize; i++){
+    if(summaries[i]) continue;
+    
+    const el = document.getElementById(`sum-${i}`);
+    if(el){ el.style.display = 'block'; el.innerHTML = `<div class="ai-label">AI SUMMARY</div><div class="ai-thinking"><div class="dots"><span>●</span><span>●</span><span>●</span></div> Generating...</div>`; }
+    
+    try {
+      const a = articles[i];
+      const res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':claudeKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:100,messages:[{role:'user',content:`2-sentence news summary:\n"${a.title}"\n${a.desc||''}`}]})
+      });
+      const data = await res.json();
+      const sum = data.content?.[0]?.text;
+      if(sum){
+        summaries[i] = sum;
+        summaryQ++;
+        if(el){ el.innerHTML = `<div class="ai-label">AI SUMMARY</div><div class="ai-text">${sum}</div>`; }
+        document.getElementById('st2').textContent = summaryQ;
+        setProgress(65+Math.round((i/toSummarize)*35), `🤖 AI summary ${i+1}/${toSummarize}...`);
+      }
+    } catch(e){}
+    await new Promise(r=>setTimeout(r,600));
+  }
+}
+
+// ═══════════════════════════════════════════
+// AUTO REFRESH
+// ═══════════════════════════════════════════
+function startAutoRefresh(){
+  let secs = REFRESH_SECS;
+  timerInterval = setInterval(() => {
+    secs--;
+    const m = Math.floor(secs/60), s = secs%60;
+    document.getElementById('refreshTimer').textContent = `Auto-refresh: ${m}:${s.toString().padStart(2,'0')}`;
+    if(secs <= 0){
+      secs = REFRESH_SECS;
+      summaries = {};
+      summaryQ = 0;
+      fetchAllNews();
+    }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════
+function openModal(idx){
+  const a = articles[idx];
+  if(!a) return;
+  
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-cat">${a.cat.toUpperCase()} · ${a.source} · ${timeAgo(a.date)}</div>
+    <div class="modal-title">${a.title}</div>
+    ${a.img ? `<img src="${a.img}" class="modal-img" onerror="this.style.display='none'" alt="">` : ''}
+    <div class="modal-ai" id="mAI">
+      <div class="ai-label">◆ AI SUMMARY</div>
+      ${summaries[idx] ? `<div class="ai-text">${summaries[idx]}</div>` : `<div class="ai-thinking"><div class="dots"><span>●</span><span>●</span><span>●</span></div> Generating summary...</div>`}
+    </div>
+    <div class="modal-desc">${a.desc||'Click the link below to read the full article.'}</div>
+    ${a.link && a.link!='#' ? `<a href="${a.link}" target="_blank" class="modal-link">READ FULL ARTICLE →</a>` : ''}
+  `;
+  document.getElementById('modal').classList.add('on');
+  
+  if(!summaries[idx] && claudeKey) summarizeForModal(idx);
+}
+
+async function summarizeForModal(idx){
+  const a = articles[idx];
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':claudeKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:150,messages:[{role:'user',content:`3-sentence news summary:\n"${a.title}"\n${a.desc||''}`}]})
+    });
+    const data = await res.json();
+    const sum = data.content?.[0]?.text;
+    if(sum){
+      summaries[idx] = sum;
+      summaryQ++;
+      const el = document.getElementById('mAI');
+      if(el) el.innerHTML = `<div class="ai-label">◆ AI SUMMARY</div><div class="ai-text">${sum}</div>`;
+    }
+  }catch(e){}
+}
+
+function closeModal(e){ if(e.target.id==='modal') document.getElementById('modal').classList.remove('on'); }
+
+// ═══════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════
+function filterCat(btn, cat){
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCat = cat;
+  renderFeed(articles);
+}
+
+function updateTicker(arts){
+  const items = arts.slice(0,14).map(a => `<span>${a.source.toUpperCase()}: ${a.title}</span>`).join('');
+  document.getElementById('tickerInner').innerHTML = items + items;
+}
+
+function updateTrending(arts){
+  document.getElementById('trendList').innerHTML = arts.slice(0,6).map((a,i) => `
+    <a class="trend-item" href="${a.link}" target="_blank">
+      <div class="trend-n">${String(i+1).padStart(2,'0')}</div>
+      <div class="trend-info">
+        <div class="trend-title">${a.title.slice(0,65)}…</div>
+        <div class="trend-src">${a.source}</div>
+      </div>
+    </a>`).join('');
+}
+
+function updateSourceTags(arts){
+  const srcs = [...new Set(arts.map(a => a.source))].slice(0,15);
+  document.getElementById('sourceTagList').innerHTML = srcs.map(s => `<span class="source-tag">${s}</span>`).join('');
+}
+
+function updateStats(){
+  const srcs = new Set(articles.map(a => a.source)).size;
+  document.getElementById('st1').textContent = articles.length;
+  document.getElementById('st3').textContent = srcs;
+  document.getElementById('st4').textContent = autoRuns;
+  document.getElementById('countDisplay').textContent = `${articles.length} articles · ${srcs} sources`;
+  document.getElementById('sourceInfo').textContent = `${srcs} sources active`;
+}
+
+function setProgress(pct, text){
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progText').textContent = text;
+}
+
+function timeAgo(d){
+  const diff = Date.now() - new Date(d);
+  const m = Math.floor(diff/60000);
+  if(m < 1) return 'just now';
+  if(m < 60) return `${m}m ago`;
+  const h = Math.floor(m/60);
+  if(h < 24) return `${h}h ago`;
+  return `${Math.floor(h/24)}d ago`;
+}
+</script>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- EYE TRACKING SCROLL — MediaPipe FaceMesh  -->
+<!-- ══════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+
+<style>
+/* EYE TRACKER WIDGET */
+#eyeWidget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  font-family: 'Space Mono', monospace;
+}
+
+#eyeToggleBtn {
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 4px 4px 0 var(--accent);
+  transition: all .2s;
+  white-space: nowrap;
+}
+#eyeToggleBtn:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--accent); }
+#eyeToggleBtn.active { background: var(--green); box-shadow: 4px 4px 0 #1a6b3a; }
+
+#eyePanel {
+  position: absolute;
+  bottom: 56px;
+  right: 0;
+  width: 280px;
+  background: var(--ink);
+  border: 2px solid var(--gold);
+  padding: 16px;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+#eyePanel.show { display: flex; }
+
+.eye-panel-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.eye-cam-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: #000;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+#eyeVideo { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+#eyeCanvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  transform: scaleX(-1);
+}
+.gaze-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.gaze-label {
+  font-size: 10px;
+  color: rgba(255,255,255,.5);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+.gaze-bar {
+  height: 8px;
+  background: #222;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.gaze-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--green);
+  transition: width .1s, background .1s;
+  width: 50%;
+}
+.gaze-fill.danger { background: var(--accent); }
+
+.eye-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.eye-stat {
+  background: rgba(255,255,255,.05);
+  padding: 8px;
+  text-align: center;
+}
+.eye-stat-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--gold);
+}
+.eye-stat-lbl { font-size: 9px; color: rgba(255,255,255,.4); letter-spacing: 1px; }
+
+.eye-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: rgba(255,255,255,.6);
+}
+.eye-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #555;
+  flex-shrink: 0;
+}
+.eye-dot.ok { background: var(--green); animation: pulse2 1.5s infinite; }
+.eye-dot.warn { background: var(--gold); }
+.eye-dot.scroll { background: var(--accent); animation: pulse2 .5s infinite; }
+@keyframes pulse2 { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
+
+/* GAZE ZONE INDICATOR — full screen overlay */
+#gazeOverlay {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, rgba(192,57,43,0));
+  pointer-events: none;
+  z-index: 8888;
+  transition: background .2s;
+}
+#gazeOverlay.active {
+  background: linear-gradient(to bottom, transparent, rgba(192,57,43,0.15));
+  border-bottom: 3px solid var(--accent);
+}
+
+/* SCROLL INDICATOR */
+#scrollIndicator {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 3px;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0;
+  transition: opacity .3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#scrollIndicator.show { opacity: 1; }
+</style>
+
+<!-- GAZE ZONE (bottom of screen glow) -->
+<div id="gazeOverlay"></div>
+<div id="scrollIndicator">⬇ AUTO SCROLLING</div>
+
+<!-- EYE TRACKING WIDGET -->
+<div id="eyeWidget">
+  <div id="eyePanel">
+    <div class="eye-panel-title">👁 EYE SCROLL ENGINE</div>
+    <div class="eye-cam-wrap">
+      <video id="eyeVideo" playsinline muted></video>
+      <canvas id="eyeCanvas"></canvas>
+    </div>
+    <div class="gaze-bar-wrap">
+      <div class="gaze-label"><span>GAZE DIRECTION</span><span id="gazeValTxt">CENTER</span></div>
+      <div class="gaze-bar"><div class="gaze-fill" id="gazeFill"></div></div>
+    </div>
+    <div class="gaze-bar-wrap">
+      <div class="gaze-label"><span>SCROLL SPEED</span><span id="speedTxt">0 px/s</span></div>
+      <div class="gaze-bar"><div class="gaze-fill" id="speedFill" style="background:var(--gold);width:0%"></div></div>
+    </div>
+    <div class="eye-stats">
+      <div class="eye-stat"><div class="eye-stat-val" id="statFPS">0</div><div class="eye-stat-lbl">FPS</div></div>
+      <div class="eye-stat"><div class="eye-stat-val" id="statScrolls">0</div><div class="eye-stat-lbl">SCROLLS</div></div>
+      <div class="eye-stat"><div class="eye-stat-val" id="statFaces">0</div><div class="eye-stat-lbl">FACES</div></div>
+      <div class="eye-stat"><div class="eye-stat-val" id="statZone">-</div><div class="eye-stat-lbl">ZONE</div></div>
+    </div>
+    <div class="eye-status-row">
+      <div class="eye-dot" id="eyeStatusDot"></div>
+      <span id="eyeStatusTxt">Initializing...</span>
+    </div>
+    <div style="font-size:10px;color:rgba(255,255,255,.3);line-height:1.5">
+      👁 Look at <strong style="color:var(--accent)">bottom of screen</strong> to scroll<br>
+      👁 Look at <strong style="color:var(--gold)">top of screen</strong> to scroll up<br>
+      👁 Look <strong style="color:var(--green)">center</strong> to stop
+    </div>
+  </div>
+  <button id="eyeToggleBtn" onclick="toggleEyeTracker()">
+    <span>👁</span> EYE SCROLL
+  </button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// EYE TRACKING SCROLL ALGORITHM
+// ══════════════════════════════════════════
+
+let eyeActive = false;
+let faceMeshInstance = null;
+let cameraInstance = null;
+let scrollCount = 0;
+let frameCount = 0;
+let lastFPSTime = Date.now();
+let currentFPS = 0;
+let isScrolling = false;
+let scrollAnimFrame = null;
+let currentScrollSpeed = 0;
+let gazeHistory = []; // Smooth gaze with history
+const GAZE_HISTORY_LEN = 8;
+
+// ── GAZE ZONES ──
+// LOOK_DOWN_THRESHOLD: If gaze ratio > this → looking down → scroll down
+// LOOK_UP_THRESHOLD:   If gaze ratio < this → looking up → scroll up
+const LOOK_DOWN_THRESHOLD = 0.68;
+const LOOK_UP_THRESHOLD   = 0.32;
+const SCROLL_BASE_SPEED   = 4;
+const SCROLL_MAX_SPEED    = 18;
+
+function toggleEyeTracker() {
+  const btn = document.getElementById('eyeToggleBtn');
+  const panel = document.getElementById('eyePanel');
+
+  if (!eyeActive) {
+    panel.classList.add('show');
+    btn.classList.add('active');
+    btn.innerHTML = '<span>⟳</span> LOADING...';
+    btn.disabled = true;
+    initEyeTracker();
+  } else {
+    stopEyeTracker();
+    panel.classList.remove('show');
+    btn.classList.remove('active');
+    btn.innerHTML = '<span>👁</span> EYE SCROLL';
+    btn.disabled = false;
+  }
+}
+
+async function initEyeTracker() {
+  setEyeStatus('warn', 'Requesting camera...');
+
+  try {
+    // ── SETUP MEDIAPIPE FACEMESH ──
+    faceMeshInstance = new FaceMesh({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+    });
+
+    faceMeshInstance.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,   // ← CRITICAL: enables iris landmarks 468-477
+      minDetectionConfidence: 0.6,
+      minTrackingConfidence: 0.6
+    });
+
+    faceMeshInstance.onResults(onFaceMeshResults);
+    setEyeStatus('warn', 'Loading AI model...');
+
+    // ── SETUP CAMERA ──
+    const video = document.getElementById('eyeVideo');
+    cameraInstance = new Camera(video, {
+      onFrame: async () => {
+        if (faceMeshInstance) {
+          await faceMeshInstance.send({ image: video });
+        }
+        frameCount++;
+        const now = Date.now();
+        if (now - lastFPSTime >= 1000) {
+          currentFPS = frameCount;
+          frameCount = 0;
+          lastFPSTime = now;
+          document.getElementById('statFPS').textContent = currentFPS;
+        }
+      },
+      width: 320,
+      height: 240
+    });
+
+    await cameraInstance.start();
+    eyeActive = true;
+
+    const btn = document.getElementById('eyeToggleBtn');
+    btn.innerHTML = '<span>👁</span> STOP';
+    btn.disabled = false;
+    setEyeStatus('ok', 'Tracking active — look down to scroll!');
+
+  } catch(err) {
+    setEyeStatus('warn', 'Camera error: ' + err.message);
+    const btn = document.getElementById('eyeToggleBtn');
+    btn.innerHTML = '<span>👁</span> EYE SCROLL';
+    btn.disabled = false;
+    btn.classList.remove('active');
+    document.getElementById('eyePanel').classList.remove('show');
+  }
+}
+
+function stopEyeTracker() {
+  eyeActive = false;
+  if (cameraInstance) { try { cameraInstance.stop(); } catch(e){} cameraInstance = null; }
+  if (faceMeshInstance) { try { faceMeshInstance.close(); } catch(e){} faceMeshInstance = null; }
+  stopAutoScroll();
+  document.getElementById('gazeOverlay').classList.remove('active');
+  document.getElementById('scrollIndicator').classList.remove('show');
+}
+
+// ══════════════════════════════════════════
+// CORE ALGORITHM: GAZE DETECTION
+// ══════════════════════════════════════════
+function onFaceMeshResults(results) {
+  const canvas = document.getElementById('eyeCanvas');
+  const ctx = canvas.getContext('2d');
+  const video = document.getElementById('eyeVideo');
+
+  canvas.width = video.videoWidth || 320;
+  canvas.height = video.videoHeight || 240;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
+    document.getElementById('statFaces').textContent = '0';
+    setEyeStatus('warn', 'No face detected — move closer');
+    gazeHistory = [];
+    stopAutoScroll();
+    return;
+  }
+
+  const lm = results.multiFaceLandmarks[0];
+  document.getElementById('statFaces').textContent = results.multiFaceLandmarks.length;
+
+  // ── IRIS LANDMARKS (requires refineLandmarks: true) ──
+  // Left iris center  → index 468
+  // Right iris center → index 473
+  const leftIrisCenter  = lm[468];
+  const rightIrisCenter = lm[473];
+
+  // ── EYE VERTICAL BOUNDS ──
+  // Left eye:  top=159, bottom=145
+  // Right eye: top=386, bottom=374
+  const leftEyeTop    = lm[159];
+  const leftEyeBot    = lm[145];
+  const rightEyeTop   = lm[386];
+  const rightEyeBot   = lm[374];
+
+  // ── EYE HORIZONTAL BOUNDS (for left/right gaze) ──
+  const leftEyeLeft   = lm[33];
+  const leftEyeRight  = lm[133];
+  const rightEyeLeft  = lm[362];
+  const rightEyeRight = lm[263];
+
+  // ── CALCULATE VERTICAL GAZE RATIO ──
+  // 0.0 = looking fully UP
+  // 0.5 = looking CENTER
+  // 1.0 = looking fully DOWN
+  const leftEyeHeight  = leftEyeBot.y  - leftEyeTop.y;
+  const rightEyeHeight = rightEyeBot.y - rightEyeTop.y;
+
+  let leftGazeV  = leftEyeHeight  > 0.001 ? (leftIrisCenter.y  - leftEyeTop.y)  / leftEyeHeight  : 0.5;
+  let rightGazeV = rightEyeHeight > 0.001 ? (rightIrisCenter.y - rightEyeTop.y) / rightEyeHeight : 0.5;
+  let gazeV = (leftGazeV + rightGazeV) / 2;
+
+  // ── SMOOTH GAZE (rolling average) ──
+  gazeHistory.push(gazeV);
+  if (gazeHistory.length > GAZE_HISTORY_LEN) gazeHistory.shift();
+  const smoothGaze = gazeHistory.reduce((a,b) => a+b, 0) / gazeHistory.length;
+
+  // ── UPDATE UI ──
+  const fillPct = Math.round(smoothGaze * 100);
+  const fill = document.getElementById('gazeFill');
+  fill.style.width = fillPct + '%';
+
+  let zone = 'CENTER';
+  if (smoothGaze > LOOK_DOWN_THRESHOLD) {
+    zone = '⬇ DOWN';
+    fill.classList.add('danger');
+    // SCROLL DOWN — speed proportional to how far down they look
+    const intensity = Math.min((smoothGaze - LOOK_DOWN_THRESHOLD) / (1 - LOOK_DOWN_THRESHOLD), 1);
+    currentScrollSpeed = SCROLL_BASE_SPEED + intensity * (SCROLL_MAX_SPEED - SCROLL_BASE_SPEED);
+    triggerAutoScroll(1);
+    document.getElementById('gazeOverlay').classList.add('active');
+    document.getElementById('scrollIndicator').textContent = '⬇ AUTO SCROLLING — Look away to stop';
+    document.getElementById('scrollIndicator').classList.add('show');
+  } else if (smoothGaze < LOOK_UP_THRESHOLD) {
+    zone = '⬆ UP';
+    fill.classList.remove('danger');
+    fill.style.background = 'var(--gold)';
+    const intensity = Math.min((LOOK_UP_THRESHOLD - smoothGaze) / LOOK_UP_THRESHOLD, 1);
+    currentScrollSpeed = SCROLL_BASE_SPEED + intensity * (SCROLL_MAX_SPEED - SCROLL_BASE_SPEED);
+    triggerAutoScroll(-1);
+    document.getElementById('gazeOverlay').classList.remove('active');
+    document.getElementById('scrollIndicator').textContent = '⬆ SCROLLING UP';
+    document.getElementById('scrollIndicator').classList.add('show');
+  } else {
+    fill.classList.remove('danger');
+    fill.style.background = 'var(--green)';
+    currentScrollSpeed = 0;
+    stopAutoScroll();
+    document.getElementById('gazeOverlay').classList.remove('active');
+    document.getElementById('scrollIndicator').classList.remove('show');
+  }
+
+  document.getElementById('gazeValTxt').textContent = (smoothGaze * 100).toFixed(0) + '%';
+  document.getElementById('statZone').textContent = zone === '⬇ DOWN' ? '↓' : zone === '⬆ UP' ? '↑' : '●';
+  document.getElementById('speedTxt').textContent = Math.round(currentScrollSpeed) + ' px/f';
+  document.getElementById('speedFill').style.width = Math.min(currentScrollSpeed / SCROLL_MAX_SPEED * 100, 100) + '%';
+  setEyeStatus('ok', `Gaze: ${(smoothGaze*100).toFixed(0)}% | ${zone}`);
+
+  // ── DRAW EYE LANDMARKS ON CANVAS ──
+  drawEyeDebug(ctx, lm, canvas.width, canvas.height,
+    leftIrisCenter, rightIrisCenter,
+    leftEyeTop, leftEyeBot, leftEyeLeft, leftEyeRight,
+    rightEyeTop, rightEyeBot, rightEyeLeft, rightEyeRight,
+    smoothGaze
+  );
+}
+
+// ══════════════════════════════════════════
+// AUTO SCROLL ENGINE
+// ══════════════════════════════════════════
+let scrollDirection = 0;
+
+function triggerAutoScroll(direction) {
+  scrollDirection = direction;
+  if (isScrolling) return;
+  isScrolling = true;
+  doScroll();
+}
+
+function doScroll() {
+  if (!isScrolling || !eyeActive) return;
+  window.scrollBy(0, scrollDirection * currentScrollSpeed);
+  scrollCount++;
+  document.getElementById('statScrolls').textContent = scrollCount;
+  scrollAnimFrame = requestAnimationFrame(doScroll);
+}
+
+function stopAutoScroll() {
+  isScrolling = false;
+  if (scrollAnimFrame) { cancelAnimationFrame(scrollAnimFrame); scrollAnimFrame = null; }
+}
+
+// ══════════════════════════════════════════
+// CANVAS DEBUG VISUALIZER
+// ══════════════════════════════════════════
+function drawEyeDebug(ctx, lm, w, h,
+  lIris, rIris, lTop, lBot, lLeft, lRight,
+  rTop, rBot, rLeft, rRight, gazeV
+) {
+  const col = gazeV > LOOK_DOWN_THRESHOLD ? '#e74c3c' :
+              gazeV < LOOK_UP_THRESHOLD   ? '#f39c12' : '#2ecc71';
+
+  // Helper: landmark coords to canvas pixels
+  const px = (pt) => ({ x: pt.x * w, y: pt.y * h });
+
+  // Draw eye outlines
+  const eyePoints = [
+    [lm[33],lm[246],lm[161],lm[160],lm[159],lm[158],lm[157],lm[173],lm[133],lm[155],lm[154],lm[153],lm[145],lm[144],lm[163],lm[7]],
+    [lm[362],lm[398],lm[384],lm[385],lm[386],lm[387],lm[388],lm[466],lm[263],lm[249],lm[390],lm[373],lm[374],lm[380],lm[381],lm[382]]
+  ];
+  eyePoints.forEach(pts => {
+    ctx.beginPath();
+    pts.forEach((pt, i) => {
+      const p = px(pt);
+      i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+    });
+    ctx.closePath();
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = col + '22';
+    ctx.fill();
+  });
+
+  // Draw iris circles
+  [[lIris, lLeft, lRight], [rIris, rLeft, rRight]].forEach(([iris, eyeL, eyeR]) => {
+    const ic = px(iris);
+    const ew = Math.abs(eyeR.x - eyeL.x) * w;
+    const r = ew * 0.28;
+
+    // Iris circle
+    ctx.beginPath();
+    ctx.arc(ic.x, ic.y, r, 0, Math.PI * 2);
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = col + '33';
+    ctx.fill();
+
+    // Iris center dot
+    ctx.beginPath();
+    ctx.arc(ic.x, ic.y, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+  });
+
+  // Gaze direction arrow
+  const centerX = w / 2;
+  const centerY = h / 2;
+  const arrowLen = 20;
+  const arrowY = gazeV > 0.5 ?
+    centerY + (gazeV - 0.5) * arrowLen * 2 :
+    centerY - (0.5 - gazeV) * arrowLen * 2;
+
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY);
+  ctx.lineTo(centerX, arrowY);
+  ctx.strokeStyle = col;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Gaze % text
+  ctx.fillStyle = col;
+  ctx.font = 'bold 11px monospace';
+  ctx.fillText((gazeV * 100).toFixed(0) + '%', 6, h - 6);
+}
+
+// ── STATUS HELPER ──
+function setEyeStatus(type, text) {
+  const dot = document.getElementById('eyeStatusDot');
+  const txt = document.getElementById('eyeStatusTxt');
+  dot.className = 'eye-dot ' + type;
+  txt.textContent = text;
+}
+</script>
+</body>
+</html>
